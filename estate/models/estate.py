@@ -1,21 +1,22 @@
 from odoo import fields, models
+from dateutil.relativedelta import relativedelta
+
 
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Real Estate Property"
 
+    # ── Basic fields ──────────────────────────────────
     name = fields.Char(required=True)
     description = fields.Text()
     postcode = fields.Char()
-    date_availability = fields.Date()
     expected_price = fields.Float(required=True)
-    selling_price = fields.Float()
-    bedrooms = fields.Integer()
-    living_area = fields.Float()
+    bedrooms = fields.Integer(default=2)
+    living_area = fields.Integer()
     facades = fields.Integer()
     garage = fields.Boolean()
     garden = fields.Boolean()
-    garage_area = fields.Float()
+    garden_area = fields.Integer()  #
     garden_orientation = fields.Selection(
         string='Garden Orientation',
         selection=[
@@ -25,4 +26,27 @@ class EstateProperty(models.Model):
             ('west', 'West'),
         ],
         help="Select the orientation of the garden"
+    )
+
+    date_availability = fields.Date(
+        copy=False,
+        default=lambda self: fields.Date.today() + relativedelta(months=3)
+    )
+    selling_price = fields.Float(
+        readonly=True,
+        copy=False
+    )
+
+    active = fields.Boolean(default=True)
+    state = fields.Selection(
+        selection=[
+            ('new', 'New'),
+            ('offer_received', 'Offer Received'),
+            ('offer_accepted', 'Offer Accepted'),
+            ('sold', 'Sold'),
+            ('cancelled', 'Cancelled'),
+        ],
+        required=True,
+        copy=False,
+        default='new',
     )
